@@ -131,7 +131,7 @@ export default {
     },
 
     async doLogin() {
-      // 主动抛出异常
+      // 主动抛出异常 hhh
       try {
         // const { data: res } = await login(this.loginForm)
         const res = await this.$store.dispatch('user/userLogin', this.loginForm)
