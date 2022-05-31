@@ -1,5 +1,8 @@
-// import router from './router'
-// import store from './store'
+import router from './router'
+import store from './store'
+import NProgress from 'nprogress' // progress bar
+import 'nprogress/nprogress.css' // progress bar style
+import getPageTitle from './utils/get-page-title'
 // import { Message } from 'element-ui'
 // import NProgress from 'nprogress' // progress bar
 // import 'nprogress/nprogress.css' // progress bar style
@@ -62,3 +65,41 @@
 //   // finish progress bar
 //   NProgress.done()
 // })
+const withedList = ['/login', '/404']
+router.beforeEach(async(to, from, next) => {
+  NProgress.start()
+  const token = store.state.user.token
+  if (token) {
+    if (!store.getters.userId) {
+      // 调用 vuex 里的 actions 的方法
+      await store.dispatch('user/getUserProfile')
+    }
+    //   已登录
+    if (to.path === '/login') {
+      // 已经登录了, 并且还要去登录页, 就把你打回到首页
+      next('/')
+      NProgress.done()
+    } else {
+      // 反之  则放行
+      next()
+    }
+  } else {
+    // 未登录
+    if (withedList.includes(to.path)) {
+      next()
+    } else {
+      next('/login')
+      NProgress.done()
+    }
+  }
+})
+
+router.beforeEach((to, from, next) => {
+  document.title = getPageTitle(to.meta.title)
+  next()
+})
+
+// 后置路由守卫
+router.afterEach(() => {
+  NProgress.done()
+})

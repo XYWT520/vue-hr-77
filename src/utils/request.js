@@ -1,7 +1,7 @@
 // 导出一个axios的实例  而且这个实例要有请求拦截器 响应拦截器
 import axios from 'axios'
 import store from '@/store'
-
+import router from '@/router'
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API
   // 线上的地址
@@ -20,6 +20,15 @@ service.interceptors.response.use(function(response) {
     return response.data
   }
 }, function(error) {
+  // token 失效 清楚用户数据
+  if (error.response.data.code === 10002) {
+    store.dispatch('user/logout')
+
+    router.push({
+      path: '/login',
+      query: { return_url: location.hash.substring(1) }
+    })
+  }
   // 超出 2xx 范围的状态码都会触发该函数。
   // 对响应错误做点什么
   return Promise.reject(error)
