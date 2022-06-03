@@ -18,7 +18,7 @@
                     操作<i class="el-icon-arrow-down" />
                   </span>
                   <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item @click.native="hshowAdd">添加子部门</el-dropdown-item>
+                    <el-dropdown-item @click.native="hshowAdd('')">添加子部门</el-dropdown-item>
                   </el-dropdown-menu>
                 </el-dropdown>
               </el-col>
@@ -44,7 +44,8 @@
                       <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item @click.native="hshowAdd(data.id)">添加子部门</el-dropdown-item>
                         <el-dropdown-item @click.native="hshowEdit(data.id)">编辑子部门</el-dropdown-item>
-                        <el-dropdown-item @click.native="hDelete(data.id)">删除子部门</el-dropdown-item>
+                        <!-- v-if="data.children.length === 0 " 删除优化 表示有子部门的就不能删除 -->
+                        <el-dropdown-item v-if="data.children.length === 0 " @click.native="hDelete(data.id)">删除子部门</el-dropdown-item>
                       </el-dropdown-menu>
                     </el-dropdown>
                   </el-col>
@@ -64,7 +65,7 @@
       :visible.sync="showVisible"
     >
       <span slot="footer" class="dialog-footer" />
-      <addOrEdit :id="curId" :is-edit="isEdit" @success="hsuccess" />
+      <addOrEdit v-if="showVisible" :id="curId" :origin-list="originList" :is-edit="isEdit" @success="hsuccess" @hcolse="close" />
     </el-dialog>
 
     <!-- 编辑的 dialog -->
@@ -75,7 +76,7 @@
       :visible.sync="isEditVisible"
     >
       <span slot="footer" class="dialog-footer" />
-      <addOrEdit v-if="isEditVisible" :id="curId" :is-edit="isEdit" @success="hsuccess" />
+      <addOrEdit v-if="isEditVisible" :id="curId" :origin-list="originList" :is-edit="isEdit" @success="hsuccess" @hcolse="close" />
     </el-dialog>
   </div>
 </template>
@@ -109,7 +110,8 @@ export default {
       showVisible: false,
       curId: '',
       isEditVisible: false,
-      isEdit: false
+      isEdit: false,
+      originList: []
     }
   },
 
@@ -123,6 +125,12 @@ export default {
       const res = await getDepartments()
       res.data.depts.shift()
       // console.log(res)
+      // map 方法 循环一次得到一个新的对象 放进新数组里面
+      // this.originList = res.data.depts.map(item => {
+      //   return { id: item.id, pid: item.pid, code: item.code, name: item.name }
+      // })
+      this.originList = res.data.depts.map(({ id, pid, name, code }) => ({ id, pid, name, code }))
+      // console.log(this.originList)
       this.list = tranListToTreeData(res.data.depts)
     },
 
@@ -167,6 +175,12 @@ export default {
       this.isEditVisible = false
       // 重新获取最新数据
       this.loadDepartments()
+    },
+
+    // 点击取消关闭 弹出框
+    close() {
+      this.showVisible = false
+      this.isEditVisible = false
     }
   }
 

@@ -2,6 +2,7 @@
 import axios from 'axios'
 import store from '@/store'
 import router from '@/router'
+import { Message } from 'element-ui'
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API
   // 线上的地址
@@ -28,6 +29,7 @@ service.interceptors.response.use(function(response) {
       path: '/login',
       query: { return_url: location.hash.substring(1) }
     })
+    Message.error('身份认证失败,请重新登录')
   }
   // 超出 2xx 范围的状态码都会触发该函数。
   // 对响应错误做点什么
