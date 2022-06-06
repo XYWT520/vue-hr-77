@@ -16,3 +16,20 @@ export function getEmployees(params) {
     params
   })
 }
+
+// 删除员工
+export function delEmployee(id) {
+  return request({
+    method: 'delete',
+    url: '/sys/user/' + id
+  })
+}
+
+// 新增员工
+export function addEmployee(data) {
+  return request({
+    method: 'post',
+    url: '/sys/user',
+    data
+  })
+}

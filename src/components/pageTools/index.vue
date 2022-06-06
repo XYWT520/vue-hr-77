@@ -5,16 +5,15 @@
       <div class="left">
         <div class="tips">
           <i class="el-icon-info" />
-          <slot name="left">
-            <span>文字区域</span>
-          </slot>
+          <!-- <span>文字区域</span> -->
+          <slot name="left" />
+
         </div>
       </div>
       <div class="right">
         <!-- 右侧 -->
-        <slot name="tight">
-          按钮区域
-        </slot>
+        <!-- 按钮区域 -->
+        <slot name="right" />
       </div>
     </div>
   </el-card>

@@ -8,7 +8,7 @@
         <template #right>
           <el-button type="warning" size="small">excel导入</el-button>
           <el-button type="danger" size="small">excel导出</el-button>
-          <el-button type="primary" size="small">新增员工</el-button>
+          <el-button type="primary" size="small" @click="showDialog = true">新增员工</el-button>
         </template>
       </page-tools>
 
@@ -31,10 +31,10 @@
           <el-table-column label="入职时间" prop="timeOfEntry" :sortable="true" />
           <el-table-column label="账户状态" />
           <el-table-column label="操作" width="280">
-            <template>
+            <template v-slot="{row}">
               <el-button type="text" size="small">查看</el-button>
               <el-button type="text" size="small">分配角色</el-button>
-              <el-button type="text" size="small">删除</el-button>
+              <el-button type="text" size="small" @click="del(row.id)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -52,18 +52,31 @@
         </el-row>
       </el-card>
     </div>
+    <el-dialog
+      :visible.sync="showDialog"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      title="新增员工"
+      width="45%"
+    >
+      <empDialog v-if="showDialog" @success="hSuccess" @cancel="hCancel" />
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getEmployees } from '@/api/employees'
+import { delEmployee, getEmployees } from '@/api/employees'
 import constant from '@/constant/employees'
-
+import empDialog from './empDialog.vue'
 export default {
+  components: {
+    empDialog
+  },
   data() {
     return {
       employess: [],
       total: 0,
+      showDialog: false,
       q: {
         page: 1,
         size: 5
@@ -98,6 +111,26 @@ export default {
       }
     },
 
+    // 删除员工
+    async del(id) {
+      try {
+        await this.$confirm('确定删除?', '提示', { type: 'warning' })
+        const res = await delEmployee(id)
+        // console.log(res)
+        // 提醒用户
+        this.$message.success(res.message)
+        // 删除优化 判断当前页是否大于一
+        if (this.employess.length === 1 && this.q.page > 1) {
+          this.q.page--
+        }
+        // 重新渲染页面
+        this.loadgetEmployees()
+      } catch (e) {
+        if (e === 'cancel') return
+        this.$message.error(e.message)
+      }
+    },
+
     // 聘用形似
     formatEmpolyess(code) {
       const result = constant.hireType.find(item => item.id === code)
@@ -109,6 +142,22 @@ export default {
       } else {
         return '未知'
       }
+    },
+
+    // 子向父传值 关闭父组件 dialog
+    hSuccess() {
+      // 关闭父组件 dialog
+      this.showDialog = false
+      // 添加完成之后，就能立刻看到添加的数据，而不要手动去点击分页
+      this.total++
+      this.q.page = Math.ceil(this.total / this.q.size)
+      // 重新获取数据
+      this.loadgetEmployees()
+    },
+
+    // 子向父传值 电击取消关闭父组件 dialog
+    hCancel() {
+      this.showDialog = false
     }
   }
 }
