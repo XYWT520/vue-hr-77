@@ -7,7 +7,7 @@
         </template>
         <template #right>
           <el-button type="warning" size="small" @click="$router.push('/import')">excel导入</el-button>
-          <el-button type="danger" size="small">excel导出</el-button>
+          <el-button type="danger" size="small" @click="handleDownload">excel导出</el-button>
           <el-button type="primary" size="small" @click="showDialog = true">新增员工</el-button>
         </template>
       </page-tools>
@@ -68,6 +68,10 @@
 import { delEmployee, getEmployees } from '@/api/employees'
 import constant from '@/constant/employees'
 import empDialog from './empDialog.vue'
+const hireTypeMap = {}
+constant.hireType.forEach(item => {
+  hireTypeMap[item.id] = item.value
+})
 export default {
   components: {
     empDialog
@@ -133,15 +137,16 @@ export default {
 
     // 聘用形似
     formatEmpolyess(code) {
-      const result = constant.hireType.find(item => item.id === code)
-      // const result = constant.hireType.find(function(item) {
-      //   return item.id === code
-      // })
-      if (result) {
-        return result.value
-      } else {
-        return '未知'
-      }
+      // const result = constant.hireType.find(item => item.id === code)
+      // // const result = constant.hireType.find(function(item) {
+      // //   return item.id === code
+      // // })
+      // if (result) {
+      //   return result.value
+      // } else {
+      //   return '未知'
+      // }
+      return hireTypeMap[code]
     },
 
     // 子向父传值 关闭父组件 dialog
@@ -158,6 +163,54 @@ export default {
     // 子向父传值 电击取消关闭父组件 dialog
     hCancel() {
       this.showDialog = false
+    },
+
+    // 导出 Excel 表格
+    async handleDownload() {
+      const mapInfo = {
+        'id': '编号',
+        'password': '密码',
+        'mobile': '手机号',
+        'username': '姓名',
+        'timeOfEntry': '入职日期',
+        'formOfEmployment': '聘用形式',
+        'correctionTime': '转正日期',
+        'workNumber': '工号',
+        'departmentName': '部门',
+        'staffPhoto': '头像地址'
+      }
+      // 发请求获取全部数据
+      const res = await getEmployees({ page: 1, size: this.total })
+      // console.log(res)
+      const list = res.data.rows
+
+      // 取出第一个数据
+      const first = list[0]
+      // 判断有没有第一个数据 没有就不让执行
+      if (!first) return
+
+      // 取出 header
+      // const header = Object.keys(first).map(item => mapInfo[item])
+      const header = Object.keys(first).map(item => mapInfo[item])
+      // console.log(header)
+
+      // 取出 data 里的数据
+      const data = list.map(item => {
+        const code = item['formOfEmployment']
+        item['formOfEmployment'] = hireTypeMap[code]
+        return Object.values(item)
+      })
+
+      this.downloadLoading = true
+      const excel = await import('@/vendor/Export2Excel')
+      excel.export_json_to_excel({
+        header, // 表头 必填
+        data, // 具体数据 必填
+        filename: 'excel-list', // 文件名称
+        autoWidth: true, // 宽度是否自适应
+        bookType: 'xlsx' // 生成的文件类型
+      })
+      this.downloadLoading = false
     }
   }
 }
