@@ -18,7 +18,9 @@
           <el-table-column label="姓名" prop="username" />
           <el-table-column label="头像" prop="username">
             <template v-slot="{row}">
-              <img class="avatar" :src="row.staffPhoto" alt="">
+              <!-- <img class="avatar" :src="row.staffPhoto" alt=""> -->
+              <!-- 默认图片 -->
+              <ImggeHolder :src="row.staffPhoto" />
             </template>
           </el-table-column>
           <el-table-column label="工号" prop="workNumber" />
@@ -32,7 +34,7 @@
           <el-table-column label="账户状态" />
           <el-table-column label="操作" width="280">
             <template v-slot="{row}">
-              <el-button type="text" size="small">查看</el-button>
+              <el-button type="text" size="small" @click="$router.push('/employees/detail/' + row.id)">查看</el-button>
               <el-button type="text" size="small">分配角色</el-button>
               <el-button type="text" size="small" @click="del(row.id)">删除</el-button>
             </template>
