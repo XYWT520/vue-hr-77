@@ -70,8 +70,9 @@
       :close-on-press-escape="false"
       title="新增员工"
       width="45%"
+      @closed="$refs.assignRoles.resetRoleIds()"
     >
-      <assignRole v-if="showRoleDialog" :id="curId" ref="assignRoles" @close="showRoleDialog = false" />
+      <assignRole :id="curId" ref="assignRoles" @close="showRoleDialog = false" />
     </el-dialog>
   </div>
 </template>
@@ -232,11 +233,11 @@ export default {
     // 分配角色分配角色分配角色分配角色分配角色分配角色分配角色分配角色分配角色分配角色分配角色
     hAssginRole(id) {
       // console.log('当前要分配的角色id是:', id)
-      this.showRoleDialog = true
       this.curId = id
-      // this.$nextTick(() => {
-      //   this.$refs.assignRoles.loadgetRoles()
-      // })
+      this.showRoleDialog = true
+      this.$nextTick(() => {
+        this.$refs.assignRoles.loadgetUserDetailById()
+      })
     }
 
   }

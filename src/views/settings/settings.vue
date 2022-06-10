@@ -21,7 +21,7 @@
               <el-table-column label="描述" prop="description" />
               <el-table-column label="操作">
                 <template v-slot="{row}">
-                  <el-button size="small" type="success">分配权限</el-button>
+                  <el-button size="small" type="success" @click="showDialogAssign=true">分配权限</el-button>
                   <el-button size="small" type="primary" @click="hEdit(row)">编辑</el-button>
                   <el-button size="small" type="danger" @click="remove(row.id)">删除</el-button>
                 </template>
@@ -69,18 +69,31 @@
         </el-tabs>
       </el-card>
     </div>
+    <el-dialog
+      :visible.sync="showDialogAssign"
+      title="分配权限"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+    >
+      <assignPermission @guanbi="showDialogAssign=false" />
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { getRoles, addRoles, deleteRoles, updateRole } from '@/api/setting'
+import assignPermission from './assignPermission.vue'
 export default {
+  components: {
+    assignPermission
+  },
   data() {
     return {
       roles: [],
       total: 0,
       showDialog: false,
       isEdit: false,
+      showDialogAssign: false,
 
       roleForm: {
         name: '',
@@ -222,6 +235,8 @@ export default {
           }
         }).catch(() => {})
     }
+
+    // 分配权限分配权限分配权限分配权限分配权限分配权限分配权限分配权限
 
   }
 }
