@@ -35,7 +35,7 @@
           <el-table-column label="操作" width="280">
             <template v-slot="{row}">
               <el-button type="text" size="small" @click="$router.push('/employees/detail/' + row.id)">查看</el-button>
-              <el-button type="text" size="small">分配角色</el-button>
+              <el-button type="text" size="small" @click="hAssginRole(row.id)">分配角色</el-button>
               <el-button type="text" size="small" @click="del(row.id)">删除</el-button>
             </template>
           </el-table-column>
@@ -63,6 +63,16 @@
     >
       <empDialog v-if="showDialog" @success="hSuccess" @cancel="hCancel" />
     </el-dialog>
+
+    <el-dialog
+      :visible.sync="showRoleDialog"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      title="新增员工"
+      width="45%"
+    >
+      <assignRole v-if="showRoleDialog" :id="curId" ref="assignRoles" @close="showRoleDialog = false" />
+    </el-dialog>
   </div>
 </template>
 
@@ -70,19 +80,23 @@
 import { delEmployee, getEmployees } from '@/api/employees'
 import constant from '@/constant/employees'
 import empDialog from './empDialog.vue'
+import assignRole from './assignRole.vue'
 const hireTypeMap = {}
 constant.hireType.forEach(item => {
   hireTypeMap[item.id] = item.value
 })
 export default {
   components: {
-    empDialog
+    empDialog,
+    assignRole
   },
   data() {
     return {
       employess: [],
       total: 0,
       showDialog: false,
+      showRoleDialog: false,
+      curId: '',
       q: {
         page: 1,
         size: 5
@@ -213,7 +227,18 @@ export default {
         bookType: 'xlsx' // 生成的文件类型
       })
       this.downloadLoading = false
+    },
+
+    // 分配角色分配角色分配角色分配角色分配角色分配角色分配角色分配角色分配角色分配角色分配角色
+    hAssginRole(id) {
+      // console.log('当前要分配的角色id是:', id)
+      this.showRoleDialog = true
+      this.curId = id
+      // this.$nextTick(() => {
+      //   this.$refs.assignRoles.loadgetRoles()
+      // })
     }
+
   }
 }
 </script>

@@ -59,6 +59,30 @@ import { getPermissionList, addPermission, delPermission, getPermissionDetail, u
 import { tranListToTreeData } from '@/utils'
 export default {
   data() {
+    // 校验权限名称 同级不能重复
+    const validName = (rule, value, callback) => {
+      // 添加时的校验,不能取子元素的名字
+      // 每一项数据里的 pid 和 formData 里的 pid 不能相同
+      let nameList = null
+      if (this.isEdit) {
+        // 编辑的时校验,名字不能取兄弟的名字,并且排除自己
+        nameList = this.permissionsList.filter(item => item.pid === this.formData.pid && item.id !== this.formData.id).map(({ name }) => name)
+      } else {
+        nameList = this.permissionsList.filter(item => item.pid === this.formData.pid).map(({ name }) => name)
+      }
+      nameList.includes(value) ? callback(new Error(value + '已存在')) : callback()
+    }
+
+    // 校验 code 标识 全局不能重复
+    // const validCode = (rule, value, callback) => {
+    //   // 添加时的校验：code不能重复
+    //   let existCodeList = this.permissionsList
+    //   if (this.isEdit) {
+    //     // 编辑时的校验: code能取自己
+    //     existCodeList = this.permissionsList.filter(item => item.id !== this.formData.id)
+    //   }
+    //   existCodeList.map(it => it.code).includes(value) ? callback(new Error(value + '已经占用')) : callback()
+    // }
     return {
       permissionsList: [],
       showDialog: false,
@@ -73,10 +97,12 @@ export default {
       },
       rules: {
         name: [
-          { required: true, message: '名称不能为空', trigger: 'blur' }
+          { required: true, message: '名称不能为空', trigger: 'blur' },
+          { validator: validName, trigger: 'blur' }
         ],
         code: [
           { required: true, message: '权限标识不能为空', trigger: 'blur' }
+          // { validator: validCode, trigger: 'blur' }
         ],
         description: [
           { required: true, message: '描述不能为空', trigger: 'blur' }
